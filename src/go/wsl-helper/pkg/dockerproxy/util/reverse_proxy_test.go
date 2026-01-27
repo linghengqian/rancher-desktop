@@ -38,7 +38,7 @@ func TestFlushedWriterPeriodicFlush(t *testing.T) {
 
 	select {
 	case <-flusher.flushCh:
-	case <-time.After(2 * flushInterval):
+	case <-time.After(flushInterval * flushTestTimeoutMultiplier):
 		t.Fatal("expected periodic flush")
 	}
 }
@@ -60,9 +60,11 @@ func TestFlushedWriterStopFlushingSuppressesPeriodicFlush(t *testing.T) {
 	select {
 	case <-flusher.flushCh:
 		t.Fatal("unexpected flush after stopFlushing")
-	case <-time.After(2 * flushInterval):
+	case <-time.After(flushInterval * flushTestTimeoutMultiplier):
 	}
 }
+
+const flushTestTimeoutMultiplier = 2
 
 type recordingFlusher struct {
 	flushCh chan struct{}

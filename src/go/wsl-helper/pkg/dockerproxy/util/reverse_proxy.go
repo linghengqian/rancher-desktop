@@ -275,6 +275,7 @@ type flushedWriter struct {
 	w     io.Writer       // Underlying writer to which data is written.
 	mu    sync.Mutex      // Mutex to protect concurrent access to the writer and dirty flag.
 	ctx   context.Context // Context to control the lifecycle of the periodic flusher.
+	cancel context.CancelFunc
 	dirty bool            // Flag indicating whether the writer may have unflushed data.
 }
 
@@ -285,9 +286,11 @@ type flushedWriter struct {
 // that w implements http.Flusher before instantiation if periodic flushing
 // is required.
 func newFlushedWriter(ctx context.Context, w io.Writer) *flushedWriter {
+	ctx, cancel := context.WithCancel(ctx)
 	fw := &flushedWriter{
-		w:   w,
-		ctx: ctx,
+		w:      w,
+		ctx:    ctx,
+		cancel: cancel,
 	}
 
 	// periodicFlusher runs a loop that periodically flushes the writer
@@ -333,6 +336,7 @@ func (fw *flushedWriter) Write(p []byte) (n int, err error) {
 
 func (fw *flushedWriter) stopFlushing() {
 	fw.mu.Lock()
-	defer fw.mu.Unlock()
 	fw.dirty = false
+	fw.mu.Unlock()
+	fw.cancel()
 }
