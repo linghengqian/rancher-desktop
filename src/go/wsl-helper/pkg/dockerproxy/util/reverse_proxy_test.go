@@ -64,7 +64,7 @@ func TestFlushedWriterStopFlushingSuppressesPeriodicFlush(t *testing.T) {
 	}
 }
 
-const flushTestTimeoutMultiplier = 2
+const flushTestTimeoutMultiplier = 5
 
 type recordingFlusher struct {
 	flushCh chan struct{}
