@@ -335,10 +335,8 @@ func (fw *flushedWriter) Write(p []byte) (n int, err error) {
 }
 
 func (fw *flushedWriter) stopFlushing() {
-	func() {
-		fw.mu.Lock()
-		defer fw.mu.Unlock()
-		fw.dirty = false
-	}()
+	fw.mu.Lock()
+	fw.dirty = false
+	fw.mu.Unlock()
 	fw.cancel()
 }
