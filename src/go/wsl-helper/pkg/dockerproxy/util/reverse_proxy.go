@@ -286,11 +286,11 @@ type flushedWriter struct {
 // that w implements http.Flusher before instantiation if periodic flushing
 // is required.
 func newFlushedWriter(ctx context.Context, w io.Writer) *flushedWriter {
-	ctx, cancel := context.WithCancel(ctx)
+	flushCtx, flushCancel := context.WithCancel(ctx)
 	fw := &flushedWriter{
 		w:      w,
-		ctx:    ctx,
-		cancel: cancel,
+		ctx:    flushCtx,
+		cancel: flushCancel,
 	}
 
 	// periodicFlusher runs a loop that periodically flushes the writer
@@ -337,6 +337,6 @@ func (fw *flushedWriter) Write(p []byte) (n int, err error) {
 func (fw *flushedWriter) stopFlushing() {
 	fw.mu.Lock()
 	fw.dirty = false
-	fw.mu.Unlock()
 	fw.cancel()
+	fw.mu.Unlock()
 }
