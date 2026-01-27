@@ -168,6 +168,7 @@ func (proxy *ReverseProxy) forwardRequest(w http.ResponseWriter, r *http.Request
 	// long-running, streaming connections like "docker log -f"
 	fw := newFlushedWriter(ctx, w)
 	_, err = io.Copy(fw, backendResponse.Body)
+	fw.stopFlushing()
 	if err != nil {
 		proxy.logf("failed to stream the response body to the client: %v", err)
 	}
@@ -328,4 +329,10 @@ func (fw *flushedWriter) Write(p []byte) (n int, err error) {
 		fw.dirty = true
 	}
 	return n, err
+}
+
+func (fw *flushedWriter) stopFlushing() {
+	fw.mu.Lock()
+	defer fw.mu.Unlock()
+	fw.dirty = false
 }
