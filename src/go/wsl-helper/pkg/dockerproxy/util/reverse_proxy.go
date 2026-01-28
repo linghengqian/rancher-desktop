@@ -272,12 +272,11 @@ func (proxy *ReverseProxy) logf(format string, args ...any) {
 // flushedWriter wraps an io.Writer with periodic flushing capability.
 // It ensures that data is periodically flushed to the underlying writer.
 type flushedWriter struct {
-	w   io.Writer       // Underlying writer to which data is written.
-	mu  sync.Mutex      // Mutex to protect concurrent access to the writer and dirty flag.
-	ctx context.Context // Context to control the lifecycle of the periodic flusher.
-	// Cancels the periodic flusher context.
-	cancel context.CancelFunc
-	dirty  bool // Flag indicating whether the writer may have unflushed data.
+	w      io.Writer          // Underlying writer to which data is written.
+	mu     sync.Mutex         // Mutex to protect concurrent access to the writer and dirty flag.
+	ctx    context.Context    // Context to control the lifecycle of the periodic flusher.
+	cancel context.CancelFunc // Cancels the periodic flusher context.
+	dirty  bool               // Flag indicating whether the writer may have unflushed data.
 }
 
 // NewFlushedWriter creates and initializes a new flushedWriter instance.
