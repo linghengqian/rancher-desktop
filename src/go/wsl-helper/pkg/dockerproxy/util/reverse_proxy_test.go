@@ -17,7 +17,7 @@ limitations under the License.
 package util
 
 import (
-	"context"
+	"io"
 	"testing"
 	"time"
 
@@ -27,11 +27,8 @@ import (
 func TestFlushedWriterPeriodicFlush(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	flusher := newRecordingFlusher()
-	writer := newFlushedWriter(ctx, flusher)
+	writer := newFlushedWriter(t.Context(), flusher)
 
 	_, err := writer.Write([]byte("data"))
 	assert.NoError(t, err)
@@ -46,11 +43,8 @@ func TestFlushedWriterPeriodicFlush(t *testing.T) {
 func TestFlushedWriterStopFlushingSuppressesPeriodicFlush(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	flusher := newRecordingFlusher()
-	writer := newFlushedWriter(ctx, flusher)
+	writer := newFlushedWriter(t.Context(), flusher)
 
 	_, err := writer.Write([]byte("data"))
 	assert.NoError(t, err)
@@ -67,22 +61,17 @@ func TestFlushedWriterStopFlushingSuppressesPeriodicFlush(t *testing.T) {
 const flushTestTimeoutMultiplier = 5
 
 type recordingFlusher struct {
+	io.Writer
 	flushCh chan struct{}
 }
 
 func newRecordingFlusher() *recordingFlusher {
 	return &recordingFlusher{
+		Writer:  io.Discard,
 		flushCh: make(chan struct{}, 1),
 	}
 }
 
-func (writer *recordingFlusher) Write(p []byte) (int, error) {
-	return len(p), nil
-}
-
 func (writer *recordingFlusher) Flush() {
-	select {
-	case writer.flushCh <- struct{}{}:
-	default:
-	}
+	close(writer.flushCh)
 }
