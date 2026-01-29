@@ -53,6 +53,7 @@ var (
 	DefaultConfigPath string
 
 	wslDistroEnvs = []string{"WSL_DISTRO_NAME", "WSL_INTEROP", "WSLENV"}
+	lstatFunc    = os.Lstat
 )
 
 // DefineGlobalFlags sets up the global flags, available for all sub-commands
@@ -138,8 +139,11 @@ func GetConnectionInfo(mayBeMissing bool) (*ConnectionInfo, error) {
 // determines if we are running in a wsl linux distro
 // by checking for availability of wslpath and see if it's a symlink
 func isWSLDistro() bool {
-	fi, err := os.Lstat("/bin/wslpath")
-	if os.IsNotExist(err) || fi.Mode()&os.ModeSymlink != os.ModeSymlink {
+	fi, err := lstatFunc("/bin/wslpath")
+	if err != nil {
+		return false
+	}
+	if fi.Mode()&os.ModeSymlink != os.ModeSymlink {
 		return false
 	}
 	return hasWSLEnvs()
