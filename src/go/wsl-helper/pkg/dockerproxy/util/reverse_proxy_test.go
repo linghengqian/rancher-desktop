@@ -18,6 +18,7 @@ package util
 
 import (
 	"io"
+	"sync"
 	"testing"
 	"time"
 
@@ -49,12 +50,17 @@ func TestFlushedWriterStopFlushingSuppressesPeriodicFlush(t *testing.T) {
 	_, err := writer.Write([]byte("data"))
 	assert.NoError(t, err)
 
+	writer.mu.Lock()
+	writer.dirty = true
+	writer.mu.Unlock()
+
 	writer.stopFlushing()
 
+	assert.False(t, writer.dirty)
 	select {
-	case <-flusher.flushCh:
-		t.Fatal("unexpected flush after stopFlushing")
-	case <-time.After(flushInterval * flushTestTimeoutMultiplier):
+	case <-writer.ctx.Done():
+	default:
+		t.Fatal("expected flush context to be canceled")
 	}
 }
 
@@ -62,16 +68,19 @@ const flushTestTimeoutMultiplier = 5
 
 type recordingFlusher struct {
 	io.Writer
-	flushCh chan struct{}
+	flushCh   chan struct{}
+	closeOnce sync.Once
 }
 
 func newRecordingFlusher() *recordingFlusher {
 	return &recordingFlusher{
 		Writer:  io.Discard,
-		flushCh: make(chan struct{}, 1),
+		flushCh: make(chan struct{}),
 	}
 }
 
 func (writer *recordingFlusher) Flush() {
-	close(writer.flushCh)
+	writer.closeOnce.Do(func() {
+		close(writer.flushCh)
+	})
 }
