@@ -51,6 +51,8 @@ var (
 	configPath string
 	// DefaultConfigPath - used to differentiate not being able to find a user-specified config file from the default
 	DefaultConfigPath string
+
+	wslDistroEnvs = []string{"WSL_DISTRO_NAME", "WSL_INTEROP", "WSLENV"}
 )
 
 // DefineGlobalFlags sets up the global flags, available for all sub-commands
@@ -137,10 +139,19 @@ func GetConnectionInfo(mayBeMissing bool) (*ConnectionInfo, error) {
 // by checking for availability of wslpath and see if it's a symlink
 func isWSLDistro() bool {
 	fi, err := os.Lstat("/bin/wslpath")
-	if os.IsNotExist(err) {
+	if os.IsNotExist(err) || fi.Mode()&os.ModeSymlink != os.ModeSymlink {
 		return false
 	}
-	return fi.Mode()&os.ModeSymlink == os.ModeSymlink
+	return hasWSLEnvs()
+}
+
+func hasWSLEnvs() bool {
+	for _, envName := range wslDistroEnvs {
+		if _, ok := os.LookupEnv(envName); ok {
+			return true
+		}
+	}
+	return false
 }
 
 func getLocalAppDataPath(ctx context.Context) (string, error) {
