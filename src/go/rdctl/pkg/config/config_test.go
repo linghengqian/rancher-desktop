@@ -37,6 +37,15 @@ func TestIsWSLDistro(t *testing.T) {
 		for _, envName := range wslDistroEnvs {
 			os.Unsetenv(envName)
 		}
+		t.Cleanup(func() {
+			for envName, value := range originalEnvs {
+				if value == "" {
+					os.Unsetenv(envName)
+				} else {
+					os.Setenv(envName, value)
+				}
+			}
+		})
 		originalLstat := lstatFunc
 		t.Cleanup(func() { lstatFunc = originalLstat })
 		lstatFunc = func(_ string) (os.FileInfo, error) {
@@ -49,6 +58,15 @@ func TestIsWSLDistro(t *testing.T) {
 
 	t.Run("returns true with wslpath symlink and WSL envs", func(t *testing.T) {
 		os.Setenv(wslDistroEnvs[0], "Ubuntu")
+		t.Cleanup(func() {
+			for envName, value := range originalEnvs {
+				if value == "" {
+					os.Unsetenv(envName)
+				} else {
+					os.Setenv(envName, value)
+				}
+			}
+		})
 		originalLstat := lstatFunc
 		t.Cleanup(func() { lstatFunc = originalLstat })
 		lstatFunc = func(_ string) (os.FileInfo, error) {
@@ -61,6 +79,15 @@ func TestIsWSLDistro(t *testing.T) {
 
 	t.Run("returns false when wslpath is not a symlink", func(t *testing.T) {
 		os.Setenv(wslDistroEnvs[0], "Ubuntu")
+		t.Cleanup(func() {
+			for envName, value := range originalEnvs {
+				if value == "" {
+					os.Unsetenv(envName)
+				} else {
+					os.Setenv(envName, value)
+				}
+			}
+		})
 		originalLstat := lstatFunc
 		t.Cleanup(func() { lstatFunc = originalLstat })
 		lstatFunc = func(_ string) (os.FileInfo, error) {
@@ -73,6 +100,15 @@ func TestIsWSLDistro(t *testing.T) {
 
 	t.Run("returns false on lstat error", func(t *testing.T) {
 		os.Setenv(wslDistroEnvs[0], "Ubuntu")
+		t.Cleanup(func() {
+			for envName, value := range originalEnvs {
+				if value == "" {
+					os.Unsetenv(envName)
+				} else {
+					os.Setenv(envName, value)
+				}
+			}
+		})
 		originalLstat := lstatFunc
 		t.Cleanup(func() { lstatFunc = originalLstat })
 		lstatFunc = func(_ string) (os.FileInfo, error) {
@@ -80,6 +116,41 @@ func TestIsWSLDistro(t *testing.T) {
 		}
 		if isWSLDistro() {
 			t.Fatalf("expected isWSLDistro to be false when lstat fails")
+		}
+	})
+}
+
+func TestHasWSLEnvs(t *testing.T) {
+	originalEnvs := map[string]string{}
+	for _, envName := range wslDistroEnvs {
+		originalEnvs[envName] = os.Getenv(envName)
+	}
+	t.Cleanup(func() {
+		for envName, value := range originalEnvs {
+			if value == "" {
+				os.Unsetenv(envName)
+			} else {
+				os.Setenv(envName, value)
+			}
+		}
+	})
+
+	t.Run("returns false when none set", func(t *testing.T) {
+		for _, envName := range wslDistroEnvs {
+			os.Unsetenv(envName)
+		}
+		if hasWSLEnvs() {
+			t.Fatalf("expected hasWSLEnvs to be false without WSL envs")
+		}
+	})
+
+	t.Run("returns true when any set", func(t *testing.T) {
+		for _, envName := range wslDistroEnvs {
+			os.Unsetenv(envName)
+		}
+		os.Setenv(wslDistroEnvs[0], "Ubuntu")
+		if !hasWSLEnvs() {
+			t.Fatalf("expected hasWSLEnvs to be true with WSL envs")
 		}
 	})
 }
