@@ -58,7 +58,11 @@ func DefineGlobalFlags(rootCmd *cobra.Command) {
 	var configDir string
 	var err error
 	if runtime.GOOS == "linux" && isWSLDistro() {
-		if configDir, err = wslifyConfigDir(rootCmd.Context()); err != nil {
+		ctx := rootCmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		if configDir, err = wslifyConfigDir(ctx); err != nil {
 			log.Fatalf("Can't get WSL config-dir: %v", err)
 		}
 		configDir = filepath.Join(configDir, "rancher-desktop")
