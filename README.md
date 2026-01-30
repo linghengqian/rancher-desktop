@@ -220,6 +220,9 @@ chmod +x rancher-desktop.AppImage
 The AppImage build steps live in `packaging/linux/appimage.yml` and are executed
 by OBS against the zip artifact produced by `yarn package`. They are not wired
 into the local `yarn package` workflow.
+Running that recipe locally requires the OBS tooling (e.g. `osc`) and the OBS
+package metadata that lives in the build service, so there is no supported
+one-shot local AppImage build script in this repository.
 
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
