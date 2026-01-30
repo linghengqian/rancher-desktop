@@ -82,7 +82,7 @@ function isLonghornUpdateInfo(info: UpdateInfo | LonghornUpdateInfo): info is Lo
  * undefined.
  */
 async function getUpdater(): Promise<AppUpdater | undefined> {
-  let updater: AppUpdater;
+  let updater: AppUpdater | undefined;
 
   try {
     const { appUpdateConfigPath } = new ElectronAppAdapter();
@@ -125,16 +125,20 @@ async function getUpdater(): Promise<AppUpdater | undefined> {
     case 'linux':
       if (process.env.APPIMAGE) {
         updater = new AppImageUpdater(options);
-        break;
+      } else {
+        console.debug('Skipping updater configuration for non-AppImage Linux build.');
       }
-      console.debug('Skipping updater configuration for non-AppImage Linux build.');
-      return undefined;
+      break;
     default:
       throw new Error(`Don't know how to create updater for platform ${ os.platform() }`);
     }
   } catch (e) {
     console.error(e);
     throw e;
+  }
+
+  if (!updater) {
+    return undefined;
   }
 
   if (process.env.RD_FORCE_UPDATES_ENABLED) {
