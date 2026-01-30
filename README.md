@@ -217,6 +217,10 @@ chmod +x rancher-desktop.AppImage
 ./rancher-desktop.AppImage
 ```
 
+The AppImage build steps live in `packaging/linux/appimage.yml` and are executed
+by OBS against the zip artifact produced by `yarn package`. They are not wired
+into the local `yarn package` workflow.
+
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
 [node-gyp]: https://github.com/nodejs/node-gyp#on-unix
