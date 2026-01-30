@@ -12,6 +12,7 @@ import {
   AppImageUpdater, MacUpdater, AppUpdater, ProgressInfo, UpdateInfo,
 } from 'electron-updater';
 import { ElectronAppAdapter } from 'electron-updater/out/ElectronAppAdapter';
+import semver from 'semver';
 import yaml from 'yaml';
 
 import LonghornProvider, { hasQueuedUpdate, LonghornUpdateInfo, setHasQueuedUpdate } from './LonghornProvider';
@@ -106,6 +107,13 @@ async function getUpdater(): Promise<AppUpdater | undefined> {
       options.upgradeServer = process.env.RD_UPGRADE_RESPONDER_URL;
     }
 
+    const appVersion = Electron.app.getVersion();
+    if (!semver.valid(appVersion)) {
+      console.debug(`Skipping updater configuration for invalid app version: ${ appVersion }`);
+
+      return undefined;
+    }
+
     switch (os.platform()) {
     case 'win32': {
       updater = new MsiUpdater(options);
@@ -115,8 +123,12 @@ async function getUpdater(): Promise<AppUpdater | undefined> {
       updater = new MacUpdater(options);
       break;
     case 'linux':
-      updater = new AppImageUpdater(options);
-      break;
+      if (process.env.APPIMAGE) {
+        updater = new AppImageUpdater(options);
+        break;
+      }
+      console.debug('Skipping updater configuration for non-AppImage Linux build.');
+      return undefined;
     default:
       throw new Error(`Don't know how to create updater for platform ${ os.platform() }`);
     }
