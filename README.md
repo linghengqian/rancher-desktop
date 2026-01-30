@@ -143,7 +143,7 @@ If the GUI still flashes/crashes on restart, collect logs and process state:
 ./dist/linux-unpacked/resources/resources/linux/bin/rdctl start --path ./dist/linux-unpacked/rancher-desktop --no-modal-dialogs
 ls -la ~/.local/share/rancher-desktop/logs
 tail -n 200 ~/.local/share/rancher-desktop/logs/* 2>/dev/null
-ps -ef | grep -i rancher-desktop | grep -v grep
+ps -ef | grep -iE "(rancher-desktop|rancher desktop)" | grep -v grep
 ```
 
 [Scoop]: https://scoop.sh/
