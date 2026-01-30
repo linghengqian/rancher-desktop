@@ -224,6 +224,10 @@ Running that recipe locally requires the OBS tooling (e.g. `osc`) and the OBS
 package metadata that lives in the build service, so there is no supported
 one-shot local AppImage build script in this repository.
 
+When running a locally built Linux binary under WSL, closing the GUI window
+ends the process; if it does not exit cleanly, you can stop it explicitly with
+`rdctl shutdown` and then restart the app.
+
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
 [node-gyp]: https://github.com/nodejs/node-gyp#on-unix
