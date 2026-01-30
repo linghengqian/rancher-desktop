@@ -133,7 +133,7 @@ If `rdctl shutdown` indicates that no lima directory exists, you can
 clean up the remaining processes with:
 
 ```
-pkill -f dist/linux-unpacked/rancher-desktop
+pkill -f "dist/linux-unpacked/rancher-desktop"
 pkill -f "Rancher Desktop"
 ```
 
