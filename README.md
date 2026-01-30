@@ -129,6 +129,13 @@ lingering processes after closing. You can stop them explicitly with
 `rdctl shutdown` and then restart the app. For local builds, `rdctl` is located
 at `dist/linux-unpacked/resources/resources/linux/bin/rdctl`, so you can run:
 `./dist/linux-unpacked/resources/resources/linux/bin/rdctl shutdown`.
+If `rdctl shutdown` logs that no lima directory exists (fresh install), you can
+clean up the remaining process with:
+
+```
+pkill -f dist/linux-unpacked/rancher-desktop
+pkill -f Rancher\\ Desktop
+```
 
 [Scoop]: https://scoop.sh/
 [Visual Studio docs]: https://docs.microsoft.com/en-us/visualstudio/install/modify-visual-studio?view=vs-2022
