@@ -134,7 +134,7 @@ clean up the remaining processes with:
 
 ```
 pkill -f dist/linux-unpacked/rancher-desktop
-pkill -f Rancher\\ Desktop
+pkill -f "Rancher Desktop"
 ```
 
 [Scoop]: https://scoop.sh/
