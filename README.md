@@ -130,7 +130,7 @@ lingering processes after closing. You can stop them explicitly with
 at `dist/linux-unpacked/resources/resources/linux/bin/rdctl`, so you can run:
 `./dist/linux-unpacked/resources/resources/linux/bin/rdctl shutdown`.
 If `rdctl shutdown` logs that no lima directory exists (fresh install), you can
-clean up the remaining process with:
+clean up the remaining processes with:
 
 ```
 pkill -f dist/linux-unpacked/rancher-desktop
