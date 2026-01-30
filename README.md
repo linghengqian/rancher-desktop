@@ -129,7 +129,7 @@ lingering processes after closing. You can stop them explicitly with
 `rdctl shutdown` and then restart the app. For local builds, `rdctl` is located
 at `dist/linux-unpacked/resources/resources/linux/bin/rdctl`, so you can run:
 `./dist/linux-unpacked/resources/resources/linux/bin/rdctl shutdown`.
-If `rdctl shutdown` logs that no lima directory exists (fresh install), you can
+If `rdctl shutdown` indicates that no lima directory exists (fresh install), you can
 clean up the remaining processes with:
 
 ```
