@@ -137,6 +137,15 @@ pkill -f "dist/linux-unpacked/rancher-desktop"
 pkill -f "Rancher Desktop"
 ```
 
+If the GUI still flashes/crashes on restart, collect logs and process state:
+
+```
+./dist/linux-unpacked/resources/resources/linux/bin/rdctl start --path ./dist/linux-unpacked/rancher-desktop --no-modal-dialogs
+ls -la ~/.local/share/rancher-desktop/logs
+tail -n 200 ~/.local/share/rancher-desktop/logs/* 2>/dev/null
+ps -ef | grep -i rancher-desktop | grep -v grep
+```
+
 [Scoop]: https://scoop.sh/
 [Visual Studio docs]: https://docs.microsoft.com/en-us/visualstudio/install/modify-visual-studio?view=vs-2022
 [Windows Subsystem for Linux (WSL)]: https://docs.microsoft.com/en-us/windows/wsl/install
