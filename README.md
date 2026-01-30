@@ -201,6 +201,22 @@ On Linux, `yarn package` builds a zip archive and `dist/linux-unpacked/` by defa
 AppImage artifacts are produced by the OBS build pipeline; use the AppImage from
 the `stable`/`dev` repositories for AppImage-specific testing.
 
+Example (download latest AppImage from OBS):
+
+```
+# Stable channel
+curl -L -o rancher-desktop.AppImage \
+  https://download.opensuse.org/repositories/isv:/Rancher:/stable/AppImage/rancher-desktop-latest-x86_64.AppImage
+chmod +x rancher-desktop.AppImage
+./rancher-desktop.AppImage
+
+# Dev channel
+curl -L -o rancher-desktop.AppImage \
+  https://download.opensuse.org/repositories/isv:/Rancher:/dev/AppImage/rancher-desktop-latest-x86_64.AppImage
+chmod +x rancher-desktop.AppImage
+./rancher-desktop.AppImage
+```
+
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
 [node-gyp]: https://github.com/nodejs/node-gyp#on-unix
