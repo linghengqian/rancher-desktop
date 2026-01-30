@@ -116,7 +116,7 @@ package name you want to build):
 sudo apt update
 sudo apt install --assume-yes podman
 
-podman run --rm -it -v "$PWD:/work" -w /work opensuse/leap:15.6 bash -lc '
+podman run --rm -i -v "$PWD:/work" -w /work opensuse/leap:15.6 bash -lc '
   zypper -n refresh
   zypper -n install osc obs-service-download_url obs-service-recompress obs-service-set_version
   osc -A https://api.opensuse.org ls isv:Rancher:dev
@@ -128,7 +128,8 @@ podman run --rm -it -v "$PWD:/work" -w /work opensuse/leap:15.6 bash -lc '
 ```
 
 This uses the `packaging/linux/appimage.yml` recipe and the OBS package metadata.
-The build artifacts are written into the `~/oscbuild/` directory inside the container.
+The checkout and build artifacts are available under `isv:Rancher:dev/<package>` in
+your current host directory, and the generic guidance below still applies.
 
 ### How to get around slow mirrors
 
