@@ -78,6 +78,10 @@ If you find the `lint:go` tests are failing mysteriously, it's possible that the
 
 You can now clone the repository and run `yarn`.
 
+Note: When running the Linux build under WSL, the GUI window may leave
+lingering processes after closing. You can stop them explicitly with
+`rdctl shutdown` and then restart the app.
+
 [development virtual machine]: https://developer.microsoft.com/en-us/windows/downloads/virtual-machines/
 [automated setup script]: ./scripts/windows-setup.ps1
 
@@ -224,9 +228,6 @@ Running that recipe locally requires the OBS tooling (e.g. `osc`) and the OBS
 package metadata that lives in the build service, so there is no supported
 one-shot local AppImage build script in this repository.
 
-When running a locally built Linux binary under WSL, closing the GUI window
-ends the process; if it does not exit cleanly, you can stop it explicitly with
-`rdctl shutdown` and then restart the app.
 
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
