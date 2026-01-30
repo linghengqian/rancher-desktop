@@ -77,11 +77,6 @@ with an existing Windows installation.
 If you find the `lint:go` tests are failing mysteriously, it's possible that the line-endings are incorrect.
 
 You can now clone the repository and run `yarn`.
-
-Note: When running the Linux build under WSL, the GUI window may leave
-lingering processes after closing. You can stop them explicitly with
-`rdctl shutdown` and then restart the app.
-
 [development virtual machine]: https://developer.microsoft.com/en-us/windows/downloads/virtual-machines/
 [automated setup script]: ./scripts/windows-setup.ps1
 
@@ -128,6 +123,10 @@ If you find the `lint:go` tests are failing mysteriously, it's possible that the
    processor will treat them as literal parts of the path, and then fail.
 
 You can now clone the repository and run `yarn`.
+
+Note: When running the Linux build under WSL, the GUI window may leave
+lingering processes after closing. You can stop them explicitly with
+`rdctl shutdown` and then restart the app.
 
 [Scoop]: https://scoop.sh/
 [Visual Studio docs]: https://docs.microsoft.com/en-us/visualstudio/install/modify-visual-studio?view=vs-2022
