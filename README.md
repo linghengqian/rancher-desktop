@@ -126,7 +126,9 @@ You can now clone the repository and run `yarn`.
 
 Note: When running the Linux build under WSL, the GUI window may leave
 lingering processes after closing. You can stop them explicitly with
-`rdctl shutdown` and then restart the app.
+`rdctl shutdown` and then restart the app. For local builds, `rdctl` is located
+at `dist/linux-unpacked/resources/resources/linux/bin/rdctl`, so you can run:
+`./dist/linux-unpacked/resources/resources/linux/bin/rdctl shutdown`.
 
 [Scoop]: https://scoop.sh/
 [Visual Studio docs]: https://docs.microsoft.com/en-us/visualstudio/install/modify-visual-studio?view=vs-2022
