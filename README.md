@@ -197,6 +197,10 @@ You can then run Rancher Desktop as described below. It may fail on the first ru
 if this happens, try doing a factory reset and re-running, which has been known
 to solve this issue.
 
+On Linux, `yarn package` builds a zip archive and `dist/linux-unpacked/` by default.
+AppImage artifacts are produced by the OBS build pipeline; use the AppImage from
+the `stable`/`dev` repositories for AppImage-specific testing.
+
 [Node.js]: https://nodejs.org/
 [ffi-napi]: https://www.npmjs.com/package/ffi-napi
 [node-gyp]: https://github.com/nodejs/node-gyp#on-unix
