@@ -26,6 +26,8 @@ import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
 class Builder {
+  private static readonly DEFAULT_VERSION = '0.0.0';
+
   async replaceInFile(srcFile: string, pattern: string | RegExp, replacement: string, dstFile?: string) {
     dstFile = dstFile || srcFile;
     await fs.promises.stat(srcFile);
@@ -152,7 +154,7 @@ class Builder {
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
-    const fallbackVersion = buildUtils.packageMeta.version ?? '0.0.0';
+    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
     let fullBuildVersion: string;
     try {
       fullBuildVersion = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
@@ -162,7 +164,7 @@ class Builder {
     let finalBuildVersion = fullBuildVersion.replace(/^v/, '');
     if (!semver.valid(finalBuildVersion)) {
       console.warn(`Invalid build version ${ finalBuildVersion }; falling back to ${ fallbackVersion }`);
-      finalBuildVersion = semver.valid(fallbackVersion) ? fallbackVersion : '0.0.0';
+      finalBuildVersion = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
     }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
