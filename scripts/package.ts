@@ -16,6 +16,7 @@ import {
 } from 'electron-builder';
 import _ from 'lodash';
 import plist from 'plist';
+import semver from 'semver';
 import yaml from 'yaml';
 
 import buildUtils from './lib/build-utils';
@@ -151,13 +152,18 @@ class Builder {
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
+    const fallbackVersion = buildUtils.packageMeta.version ?? '0.0.0';
     let fullBuildVersion: string;
     try {
       fullBuildVersion = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
     } catch {
-      fullBuildVersion = 'unknown';
+      fullBuildVersion = fallbackVersion;
     }
-    const finalBuildVersion = fullBuildVersion.replace(/^v/, '');
+    let finalBuildVersion = fullBuildVersion.replace(/^v/, '');
+    if (!semver.valid(finalBuildVersion)) {
+      console.warn(`Invalid build version ${ finalBuildVersion }; falling back to ${ fallbackVersion }`);
+      finalBuildVersion = semver.valid(fallbackVersion) ? fallbackVersion : '0.0.0';
+    }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
       darwin: 'mac',
