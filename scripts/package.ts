@@ -22,7 +22,9 @@ import yaml from 'yaml';
 import buildUtils from './lib/build-utils';
 import buildInstaller, { buildCustomAction } from './lib/installer-win32';
 
-import { ReadWrite } from '@pkg/utils/typeUtils';
+type ReadWrite<T> = {
+  -readonly [P in keyof T]: T[P];
+};
 
 class Builder {
   private static readonly DEFAULT_VERSION = '0.0.0';
