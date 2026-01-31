@@ -22,7 +22,6 @@ import yaml from 'yaml';
 import buildUtils from './lib/build-utils';
 import buildInstaller, { buildCustomAction } from './lib/installer-win32';
 
-import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
 class Builder {
@@ -138,7 +137,7 @@ class Builder {
     // just using ad-hoc signing.  Note that this will fail on x86_64, so ignore
     // it there.
     if (context.arch !== Arch.x64) {
-      await spawnFile('codesign', ['--sign', '-', '--force', '--verbose', appPath], { stdio: 'inherit' });
+      await buildUtils.spawn('codesign', ['--sign', '-', '--force', '--verbose', appPath]);
     }
   }
 
