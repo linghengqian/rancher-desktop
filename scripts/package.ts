@@ -21,10 +21,8 @@ import yaml from 'yaml';
 
 import buildUtils from './lib/build-utils';
 import buildInstaller, { buildCustomAction } from './lib/installer-win32';
-
-type ReadWrite<T> = {
-  -readonly [P in keyof T]: T[P];
-};
+import { spawnFile } from '@pkg/utils/childProcess';
+import { ReadWrite } from '@pkg/utils/typeUtils';
 
 class Builder {
   private static readonly DEFAULT_VERSION = '0.0.0';
@@ -139,7 +137,7 @@ class Builder {
     // just using ad-hoc signing.  Note that this will fail on x86_64, so ignore
     // it there.
     if (context.arch !== Arch.x64) {
-      await buildUtils.spawn('codesign', ['--sign', '-', '--force', '--verbose', appPath]);
+      await spawnFile('codesign', ['--sign', '-', '--force', '--verbose', appPath], { stdio: 'inherit' });
     }
   }
 
