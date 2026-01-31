@@ -154,13 +154,13 @@ class Builder {
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
+    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
     let fullBuildVersion: string;
     try {
       fullBuildVersion = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
     } catch {
-      fullBuildVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
+      fullBuildVersion = fallbackVersion;
     }
-    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
     let finalBuildVersion = fullBuildVersion.replace(/^v/, '');
     if (!semver.valid(finalBuildVersion)) {
       console.warn(`Invalid build version ${ finalBuildVersion }; falling back to ${ fallbackVersion }`);
