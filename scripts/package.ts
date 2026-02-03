@@ -160,13 +160,15 @@ class Builder {
     try {
       const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
       const cleaned = semver.valid(described);
-
-      fullBuildVersion = cleaned || described;
+      if (!cleaned) {
+        throw new Error(`Invalid git version ${ described }`);
+      }
+      fullBuildVersion = cleaned;
     } catch {
       fullBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
     }
     if (!semver.valid(fullBuildVersion)) {
-      const fallbackBase = semver.valid(fallbackVersion) ?? Builder.DEFAULT_VERSION;
+      const fallbackBase = semver.valid(fallbackVersion) || Builder.DEFAULT_VERSION;
       console.warn(`Invalid build version ${ fullBuildVersion }; falling back to ${ fallbackBase }${ fallbackSuffix }`);
       fullBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
     }
