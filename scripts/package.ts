@@ -290,8 +290,6 @@ class Builder {
   }
 }
 
-export default Builder;
-
 (new Builder()).run().catch((e) => {
   console.error(e);
   process.exit(1);
