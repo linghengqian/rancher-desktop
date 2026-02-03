@@ -25,7 +25,7 @@ import buildInstaller, { buildCustomAction } from './lib/installer-win32';
 import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
-class Builder {
+export class Builder {
   private static readonly DEFAULT_VERSION = '0.0.0';
 
   async replaceInFile(srcFile: string, pattern: string | RegExp, replacement: string, dstFile?: string) {
@@ -148,30 +148,41 @@ class Builder {
     await this.removeMacUsageDescriptions(context);
   }
 
+  protected resolveBuildVersion(): string {
+    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
+    const fallbackSuffix = '-fallback';
+    let fullBuildVersion: string;
+
+    try {
+      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
+      const validatedVersion = semver.valid(described.replace(/^v/, ''));
+
+      if (!validatedVersion) {
+        throw new Error(`Invalid git version ${described}`);
+      }
+      fullBuildVersion = validatedVersion;
+    } catch (error) {
+      console.warn(`Failed to parse git version (${ error }); using fallback.`);
+      fullBuildVersion = `${fallbackVersion}${fallbackSuffix}`;
+    }
+
+    if (!semver.valid(fullBuildVersion)) {
+      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
+
+      console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
+      fullBuildVersion = `${fallbackBase}${fallbackSuffix}`;
+    }
+
+    return fullBuildVersion;
+  }
+
   async package(): Promise<CliOptions> {
     log.info('Packaging...');
 
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
-    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
-    const fallbackSuffix = '-fallback';
-    let fullBuildVersion: string;
-    try {
-      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim().replace(/^v/, '');
-      const validatedVersion = semver.valid(described);
-      if (!validatedVersion) {
-        throw new Error(`Invalid git version ${described}`);
-      }
-      fullBuildVersion = validatedVersion;
-    } catch {
-      fullBuildVersion = `${fallbackVersion}${fallbackSuffix}`;
-    }
-    if (!semver.valid(fullBuildVersion)) {
-      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
-      console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
-      fullBuildVersion = `${fallbackBase}${fallbackSuffix}`;
-    }
+    const fullBuildVersion = this.resolveBuildVersion();
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
       darwin: 'mac',
@@ -297,6 +308,8 @@ class Builder {
     await this.buildInstaller(options);
   }
 }
+
+export default Builder;
 
 (new Builder()).run().catch((e) => {
   console.error(e);
