@@ -161,7 +161,7 @@ class Builder {
       const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim().replace(/^v/, '');
       const validatedVersion = semver.valid(described);
       if (!validatedVersion) {
-        throw new Error(`Invalid git version ${ described }`);
+        throw new Error(`Invalid git version ${described}`);
       }
       fullBuildVersion = validatedVersion;
     } catch {
@@ -169,7 +169,7 @@ class Builder {
     }
     if (!semver.valid(fullBuildVersion)) {
       const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
-      console.warn(`Invalid build version ${ fullBuildVersion }; falling back to ${ fallbackBase }${ fallbackSuffix }`);
+      console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
       fullBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
     }
     const distDir = path.join(process.cwd(), 'dist');
