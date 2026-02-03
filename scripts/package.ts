@@ -158,7 +158,7 @@ class Builder {
     const fallbackSuffix = '-fallback';
     let fullBuildVersion: string;
     try {
-      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
+      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim().replace(/^v/, '');
       const validatedVersion = semver.valid(described);
       if (!validatedVersion) {
         throw new Error(`Invalid git version ${ described }`);
@@ -168,7 +168,7 @@ class Builder {
       fullBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
     }
     if (!semver.valid(fullBuildVersion)) {
-      const fallbackBase = semver.valid(fallbackVersion) || Builder.DEFAULT_VERSION;
+      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
       console.warn(`Invalid build version ${ fullBuildVersion }; falling back to ${ fallbackBase }${ fallbackSuffix }`);
       fullBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
     }
