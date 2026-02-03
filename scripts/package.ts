@@ -165,6 +165,7 @@ export class Builder {
     } catch {
       fullBuildVersion = fallbackTaggedVersion;
     }
+    const finalBuildVersion = fullBuildVersion.replace(/^v/, '');
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
       darwin: 'mac',
@@ -178,7 +179,7 @@ export class Builder {
 
     switch (electronPlatform) {
     case 'linux':
-      await this.createLinuxResources(fullBuildVersion);
+      await this.createLinuxResources(finalBuildVersion);
       break;
     case 'win':
       await this.createWindowsResources(distDir);
@@ -202,7 +203,7 @@ export class Builder {
       delete section[key];
     }
 
-    _.set(config, 'extraMetadata.version', fullBuildVersion);
+    _.set(config, 'extraMetadata.version', finalBuildVersion);
     await fs.promises.writeFile(configPath, yaml.stringify(config), 'utf-8');
 
     config.afterPack = this.afterPack.bind(this);
