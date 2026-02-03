@@ -8,8 +8,8 @@ describe('package version fallback', () => {
   });
 
   it('should fall back when git describe yields invalid semver', async() => {
-    const { Builder } = await import('../package');
-    const resolved = Builder.resolveBuildVersion(undefined, () => 'invalid-tag');
+    const { resolveBuildVersion } = await import('../lib/build-version');
+    const resolved = resolveBuildVersion('1.2.3', () => 'invalid-tag');
 
     expect(resolved).toMatch(/-fallback$/);
     expect(semver.valid(resolved.replace(/-fallback$/, ''))).not.toBeNull();
