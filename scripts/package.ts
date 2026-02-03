@@ -165,7 +165,7 @@ class Builder {
       }
       fullBuildVersion = validatedVersion;
     } catch {
-      fullBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
+      fullBuildVersion = `${fallbackVersion}${fallbackSuffix}`;
     }
     if (!semver.valid(fullBuildVersion)) {
       const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
