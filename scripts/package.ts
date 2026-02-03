@@ -21,6 +21,7 @@ import yaml from 'yaml';
 
 import buildUtils from './lib/build-utils';
 import buildInstaller, { buildCustomAction } from './lib/installer-win32';
+
 import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
@@ -155,16 +156,19 @@ class Builder {
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
     const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
     const fallbackSuffix = '-fallback';
-    let finalBuildVersion: string;
+    let fullBuildVersion: string;
     try {
-      finalBuildVersion = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim().replace(/^v/, '');
+      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
+      const cleaned = semver.valid(described);
+
+      fullBuildVersion = cleaned || described;
     } catch {
-      finalBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
+      fullBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
     }
-    if (!semver.valid(finalBuildVersion)) {
-      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
-      console.warn(`Invalid build version ${ finalBuildVersion }; falling back to ${ fallbackBase }${ fallbackSuffix }`);
-      finalBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
+    if (!semver.valid(fullBuildVersion)) {
+      const fallbackBase = semver.valid(fallbackVersion) ?? Builder.DEFAULT_VERSION;
+      console.warn(`Invalid build version ${ fullBuildVersion }; falling back to ${ fallbackBase }${ fallbackSuffix }`);
+      fullBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
     }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
@@ -179,7 +183,7 @@ class Builder {
 
     switch (electronPlatform) {
     case 'linux':
-      await this.createLinuxResources(finalBuildVersion);
+      await this.createLinuxResources(fullBuildVersion);
       break;
     case 'win':
       await this.createWindowsResources(distDir);
@@ -203,7 +207,7 @@ class Builder {
       delete section[key];
     }
 
-    _.set(config, 'extraMetadata.version', finalBuildVersion);
+    _.set(config, 'extraMetadata.version', fullBuildVersion);
     await fs.promises.writeFile(configPath, yaml.stringify(config), 'utf-8');
 
     config.afterPack = this.afterPack.bind(this);
