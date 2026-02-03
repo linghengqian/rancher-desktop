@@ -159,11 +159,11 @@ class Builder {
     let fullBuildVersion: string;
     try {
       const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
-      const cleaned = semver.valid(described);
-      if (!cleaned) {
+      const validatedVersion = semver.valid(described);
+      if (!validatedVersion) {
         throw new Error(`Invalid git version ${ described }`);
       }
-      fullBuildVersion = cleaned;
+      fullBuildVersion = validatedVersion;
     } catch {
       fullBuildVersion = `${ fallbackVersion }${ fallbackSuffix }`;
     }
