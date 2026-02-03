@@ -25,7 +25,7 @@ import buildInstaller, { buildCustomAction } from './lib/installer-win32';
 import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
-export class Builder {
+class Builder {
   private static readonly DEFAULT_VERSION = '0.0.0';
 
   async replaceInFile(srcFile: string, pattern: string | RegExp, replacement: string, dstFile?: string) {
