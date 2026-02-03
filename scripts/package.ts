@@ -157,9 +157,7 @@ export class Builder {
     const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
     const fallbackSuffix = '-fallback';
     let fullBuildVersion: string;
-
     const fallbackTaggedVersion = semver.valid(`${fallbackVersion}${fallbackSuffix}`) ?? Builder.DEFAULT_VERSION;
-
     try {
       fullBuildVersion = semver.valid(childProcess.execFileSync('git', ['describe', '--tags']).toString()) ?? fallbackTaggedVersion;
     } catch {
