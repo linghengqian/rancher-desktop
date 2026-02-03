@@ -5,6 +5,7 @@
 
 'use strict';
 
+import childProcess from 'child_process';
 import fs from 'fs';
 import * as path from 'path';
 
@@ -15,16 +16,17 @@ import {
 } from 'electron-builder';
 import _ from 'lodash';
 import plist from 'plist';
+import semver from 'semver';
 import yaml from 'yaml';
 
 import buildUtils from './lib/build-utils';
-import { resolveBuildVersion } from './lib/build-version';
 import buildInstaller, { buildCustomAction } from './lib/installer-win32';
 
 import { spawnFile } from '@pkg/utils/childProcess';
 import { ReadWrite } from '@pkg/utils/typeUtils';
 
 export class Builder {
+  private static readonly DEFAULT_VERSION = '0.0.0';
 
   async replaceInFile(srcFile: string, pattern: string | RegExp, replacement: string, dstFile?: string) {
     dstFile = dstFile || srcFile;
@@ -152,7 +154,23 @@ export class Builder {
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
-    const fullBuildVersion = resolveBuildVersion(buildUtils.packageMeta.version);
+    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
+    const fallbackSuffix = '-fallback';
+    let fullBuildVersion: string;
+
+    try {
+      const described = semver.valid(childProcess.execFileSync('git', ['describe', '--tags']).toString());
+      fullBuildVersion = described ? described.replace(/^v/, '') : `${fallbackVersion}${fallbackSuffix}`;
+    } catch {
+      fullBuildVersion = `${fallbackVersion}${fallbackSuffix}`;
+    }
+
+    if (!semver.valid(fullBuildVersion)) {
+      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
+
+      console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
+      fullBuildVersion = `${fallbackBase}${fallbackSuffix}`;
+    }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
       darwin: 'mac',
