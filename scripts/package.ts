@@ -148,13 +148,16 @@ export class Builder {
     await this.removeMacUsageDescriptions(context);
   }
 
-  protected resolveBuildVersion(): string {
-    const fallbackVersion = buildUtils.packageMeta.version ?? Builder.DEFAULT_VERSION;
+  static resolveBuildVersion(
+    packageVersion = buildUtils.packageMeta.version,
+    gitDescribe: () => string = () => childProcess.execFileSync('git', ['describe', '--tags']).toString().trim(),
+  ): string {
+    const fallbackVersion = packageVersion ?? Builder.DEFAULT_VERSION;
     const fallbackSuffix = '-fallback';
     let fullBuildVersion: string;
 
     try {
-      const described = childProcess.execFileSync('git', ['describe', '--tags']).toString().trim();
+      const described = gitDescribe();
       const validatedVersion = semver.valid(described.replace(/^v/, ''));
 
       if (!validatedVersion) {
@@ -182,7 +185,7 @@ export class Builder {
     // Build the electron builder configuration to include the version data
     const config: ReadWrite<Configuration> = yaml.parse(await fs.promises.readFile('packaging/electron-builder.yml', 'utf-8'));
     const configPath = path.join(buildUtils.distDir, 'electron-builder.yaml');
-    const fullBuildVersion = this.resolveBuildVersion();
+    const fullBuildVersion = Builder.resolveBuildVersion();
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
       darwin: 'mac',
