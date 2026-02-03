@@ -170,7 +170,7 @@ class Builder {
     if (!semver.valid(fullBuildVersion)) {
       const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
       console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
-      fullBuildVersion = `${ fallbackBase }${ fallbackSuffix }`;
+      fullBuildVersion = `${fallbackBase}${fallbackSuffix}`;
     }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
