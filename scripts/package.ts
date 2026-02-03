@@ -158,18 +158,12 @@ export class Builder {
     const fallbackSuffix = '-fallback';
     let fullBuildVersion: string;
 
+    const fallbackTaggedVersion = semver.valid(`${fallbackVersion}${fallbackSuffix}`) ?? Builder.DEFAULT_VERSION;
+
     try {
-      const described = semver.valid(childProcess.execFileSync('git', ['describe', '--tags']).toString());
-      fullBuildVersion = described ? described.replace(/^v/, '') : `${fallbackVersion}${fallbackSuffix}`;
+      fullBuildVersion = semver.valid(childProcess.execFileSync('git', ['describe', '--tags']).toString()) ?? fallbackTaggedVersion;
     } catch {
-      fullBuildVersion = `${fallbackVersion}${fallbackSuffix}`;
-    }
-
-    if (!semver.valid(fullBuildVersion)) {
-      const fallbackBase = semver.valid(fallbackVersion) ? fallbackVersion : Builder.DEFAULT_VERSION;
-
-      console.warn(`Invalid build version ${fullBuildVersion}; falling back to ${fallbackBase}${fallbackSuffix}`);
-      fullBuildVersion = `${fallbackBase}${fallbackSuffix}`;
+      fullBuildVersion = fallbackTaggedVersion;
     }
     const distDir = path.join(process.cwd(), 'dist');
     const electronPlatform = ({
