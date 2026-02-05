@@ -31,6 +31,9 @@ apps:
 parts:
   rancher-desktop:
     plugin: dump
+    # The rancher-desktop.zip file must be present in the same directory as
+    # this snapcraft.yaml during the build process. This is typically the
+    # linux zip artifact from the release (e.g., rancher-desktop-linux-v1.x.x.zip).
     source: rancher-desktop.zip
     source-type: local
     organize:
