@@ -125,7 +125,8 @@ install_darwin() {
 # Assume the first argument given is a path to the Rancher Desktop zip file;
 # install it, and set the global variable RDCTL to the path of the rdctl
 # executable.  If the archive is an AppImage file instead, then this function
-# instead sets APPIMAGE_PID.
+# instead sets APPIMAGE_PID.  If the archive is a snap file, it installs via
+# snap.
 install_linux() {
     if [[ $(id --user) -eq 0 ]]; then
         echo "This script should not be run as root" >&2
@@ -142,6 +143,11 @@ install_linux() {
                 --no-modal-dialogs --kubernetes.enabled \
                 --application.updater.enabled=false&
             APPIMAGE_PID=$!
+            return
+        elif [[ "$archiveName" =~ .*\.snap$ ]]; then
+            sudo snap install --dangerous --classic "$archiveName"
+            cleanups+=("sudo snap remove rancher-desktop")
+            RDCTL="/snap/rancher-desktop/current/opt/rancher-desktop/resources/resources/linux/bin/rdctl"
             return
         else
             sudo mkdir -p /opt/rancher-desktop

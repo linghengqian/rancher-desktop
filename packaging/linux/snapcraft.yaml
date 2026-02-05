@@ -1,0 +1,65 @@
+name: rancher-desktop
+title: Rancher Desktop
+summary: Kubernetes and container management on the desktop
+description: |
+  Rancher Desktop is an open-source project to bring Kubernetes and
+  container management to the desktop.
+  
+  Features:
+  - Run Kubernetes locally with containerd or dockerd (moby)
+  - Build, push, and pull container images
+  - Access kubectl and other Kubernetes CLI tools
+  - Manage container workloads with nerdctl or docker CLI
+license: Apache-2.0
+version: '0.0.0'  # This will be replaced during build
+grade: stable
+confinement: classic
+base: core24
+compression: lzo
+
+architectures:
+  - build-on: amd64
+
+apps:
+  rancher-desktop:
+    command: opt/rancher-desktop/rancher-desktop --no-sandbox
+    desktop: usr/share/applications/rancher-desktop.desktop
+    environment:
+      TMPDIR: $XDG_RUNTIME_DIR
+      DISABLE_WAYLAND: '1'
+
+parts:
+  rancher-desktop:
+    plugin: dump
+    source: rancher-desktop.zip
+    source-type: local
+    organize:
+      '*': opt/rancher-desktop/
+    override-build: |
+      craftctl default
+      
+      # Generate icons
+      icon="${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/icons/logo-square-512.png"
+      for size in 512x512 256x256 128x128 96x96 64x64 48x48 32x32 24x24 16x16; do
+        mkdir -p "${CRAFT_PART_INSTALL}/usr/share/icons/hicolor/${size}/apps"
+        convert -resize "${size}" "${icon}" \
+          "${CRAFT_PART_INSTALL}/usr/share/icons/hicolor/${size}/apps/rancher-desktop.png"
+      done
+      
+      # Install desktop file
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/applications"
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/metainfo"
+      cp "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/rancher-desktop.desktop" \
+        "${CRAFT_PART_INSTALL}/usr/share/applications/rancher-desktop.desktop"
+      cp "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/rancher-desktop.appdata.xml" \
+        "${CRAFT_PART_INSTALL}/usr/share/metainfo/rancher-desktop.appdata.xml"
+      
+      # Set chrome-sandbox permissions
+      chmod 4755 "${CRAFT_PART_INSTALL}/opt/rancher-desktop/chrome-sandbox"
+      
+      # Remove qemu binaries included in lima tarball (use system qemu)
+      rm -f "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/lima/bin/qemu-"* || true
+      rm -rf "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/lima/lib" || true
+      rm -rf "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/lima/share/qemu" || true
+    build-packages:
+      - imagemagick
