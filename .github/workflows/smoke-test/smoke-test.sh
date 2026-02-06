@@ -145,7 +145,7 @@ install_linux() {
             APPIMAGE_PID=$!
             return
         elif [[ "$archiveName" =~ .*\.snap$ ]]; then
-            sudo snap install --dangerous --classic "$archiveName"
+            sudo snap install --dangerous "$archiveName"
             cleanups+=("sudo snap remove rancher-desktop")
             RDCTL="/snap/rancher-desktop/current/opt/rancher-desktop/resources/resources/linux/bin/rdctl"
             return

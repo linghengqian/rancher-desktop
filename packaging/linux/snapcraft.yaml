@@ -13,7 +13,7 @@ description: |
 license: Apache-2.0
 version: '0.0.0'  # This will be replaced during build
 grade: stable
-confinement: classic
+confinement: strict
 base: core24
 compression: lzo
 
@@ -24,6 +24,21 @@ apps:
   rancher-desktop:
     command: opt/rancher-desktop/rancher-desktop --no-sandbox
     desktop: usr/share/applications/rancher-desktop.desktop
+    extensions:
+      - gnome
+    plugs:
+      - home
+      - network
+      - network-bind
+      - desktop
+      - x11
+      - wayland
+      - opengl
+      - audio-playback
+      - browser-support
+      - kvm
+      - ssh-keys
+      - gpg-keys
     environment:
       TMPDIR: $XDG_RUNTIME_DIR
       DISABLE_WAYLAND: '1'
