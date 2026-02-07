@@ -96,9 +96,6 @@ cidfile
 Cim
 clientcmd
 clientset
-clihost
-clipass
-cliuser
 clonefile
 cloudca
 CNCF
@@ -211,11 +208,8 @@ femto
 ffi
 Fflags
 ficlone
-filehost
 filekey
-filepass
 filestat
-fileuser
 fineprint
 fleetworkspace
 FOLDERID
@@ -631,12 +625,9 @@ tencenttke
 termch
 testbuild
 testfilethatdoesntexist
-testhost
 testid
-testpass
 testreleasedate
 testurl
-testuser
 thanosruler
 timekey
 timespan

@@ -16,8 +16,8 @@ func TestGetConnectionInfo_ValidConfigFile(t *testing.T) {
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
 	config := ConnectionInfo{
-		User:     "testuser",
-		Password: "testpass",
+		User:     "example_user",
+		Password: "example_password",
 		Host:     "192.168.1.1",
 		Port:     8080,
 	}
@@ -39,8 +39,8 @@ func TestGetConnectionInfo_ValidConfigFile(t *testing.T) {
 
 	result, err := GetConnectionInfo(false)
 	require.NoError(t, err)
-	assert.Equal(t, "testuser", result.User)
-	assert.Equal(t, "testpass", result.Password)
+	assert.Equal(t, "example_user", result.User)
+	assert.Equal(t, "example_password", result.Password)
 	assert.Equal(t, "192.168.1.1", result.Host)
 	assert.Equal(t, 8080, result.Port)
 }
@@ -111,9 +111,9 @@ func TestGetConnectionInfo_CLIOverrides(t *testing.T) {
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
 	config := ConnectionInfo{
-		User:     "fileuser",
-		Password: "filepass",
-		Host:     "filehost",
+		User:     "config_user",
+		Password: "config_password",
+		Host:     "config_host",
 		Port:     9999,
 	}
 
@@ -134,17 +134,17 @@ func TestGetConnectionInfo_CLIOverrides(t *testing.T) {
 	configPath = configFile
 	DefaultConfigPath = configFile
 	connectionSettings = ConnectionInfo{
-		User:     "cliuser",
-		Password: "clipass",
-		Host:     "clihost",
+		User:     "override_user",
+		Password: "override_password",
+		Host:     "override_host",
 		Port:     1234,
 	}
 
 	result, err := GetConnectionInfo(false)
 	require.NoError(t, err)
-	assert.Equal(t, "cliuser", result.User)
-	assert.Equal(t, "clipass", result.Password)
-	assert.Equal(t, "clihost", result.Host)
+	assert.Equal(t, "override_user", result.User)
+	assert.Equal(t, "override_password", result.Password)
+	assert.Equal(t, "override_host", result.Host)
 	assert.Equal(t, 1234, result.Port)
 }
 
@@ -153,8 +153,8 @@ func TestGetConnectionInfo_DefaultHost(t *testing.T) {
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
 	config := ConnectionInfo{
-		User:     "testuser",
-		Password: "testpass",
+		User:     "example_user",
+		Password: "example_password",
 		Port:     8080,
 	}
 
@@ -186,7 +186,7 @@ func TestGetConnectionInfo_MissingRequiredFields(t *testing.T) {
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
 	config := ConnectionInfo{
-		Host: "testhost",
+		Host: "example_host",
 	}
 
 	data, err := json.Marshal(config)
