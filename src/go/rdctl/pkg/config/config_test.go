@@ -12,7 +12,6 @@ import (
 )
 
 func TestGetConnectionInfo_ValidConfigFile(t *testing.T) {
-	// Create a temporary config file
 	tmpDir := t.TempDir()
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
@@ -28,7 +27,6 @@ func TestGetConnectionInfo_ValidConfigFile(t *testing.T) {
 	err = os.WriteFile(configFile, data, 0600)
 	require.NoError(t, err)
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	t.Cleanup(func() {
@@ -39,7 +37,6 @@ func TestGetConnectionInfo_ValidConfigFile(t *testing.T) {
 	configPath = configFile
 	DefaultConfigPath = configFile
 
-	// Test GetConnectionInfo
 	result, err := GetConnectionInfo(false)
 	require.NoError(t, err)
 	assert.Equal(t, "testuser", result.User)
@@ -52,7 +49,6 @@ func TestGetConnectionInfo_MissingConfigFile_MayBeMissing(t *testing.T) {
 	tmpDir := t.TempDir()
 	nonExistentFile := filepath.Join(tmpDir, "nonexistent.json")
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	t.Cleanup(func() {
@@ -63,7 +59,6 @@ func TestGetConnectionInfo_MissingConfigFile_MayBeMissing(t *testing.T) {
 	configPath = ""
 	DefaultConfigPath = nonExistentFile
 
-	// Test GetConnectionInfo with mayBeMissing=true
 	result, err := GetConnectionInfo(true)
 	assert.Nil(t, result)
 	assert.Nil(t, err)
@@ -73,7 +68,6 @@ func TestGetConnectionInfo_MissingConfigFile_Required(t *testing.T) {
 	tmpDir := t.TempDir()
 	nonExistentFile := filepath.Join(tmpDir, "nonexistent.json")
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	t.Cleanup(func() {
@@ -84,7 +78,6 @@ func TestGetConnectionInfo_MissingConfigFile_Required(t *testing.T) {
 	configPath = nonExistentFile
 	DefaultConfigPath = nonExistentFile
 
-	// Test GetConnectionInfo with mayBeMissing=false
 	result, err := GetConnectionInfo(false)
 	assert.Nil(t, result)
 	assert.Error(t, err)
@@ -94,11 +87,9 @@ func TestGetConnectionInfo_InvalidJSON(t *testing.T) {
 	tmpDir := t.TempDir()
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
-	// Write invalid JSON
 	err := os.WriteFile(configFile, []byte("not valid json"), 0600)
 	require.NoError(t, err)
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	t.Cleanup(func() {
@@ -109,7 +100,6 @@ func TestGetConnectionInfo_InvalidJSON(t *testing.T) {
 	configPath = configFile
 	DefaultConfigPath = configFile
 
-	// Test GetConnectionInfo
 	result, err := GetConnectionInfo(false)
 	assert.Nil(t, result)
 	assert.Error(t, err)
@@ -132,7 +122,6 @@ func TestGetConnectionInfo_CLIOverrides(t *testing.T) {
 	err = os.WriteFile(configFile, data, 0600)
 	require.NoError(t, err)
 
-	// Set the config path and CLI overrides
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	originalConnectionSettings := connectionSettings
@@ -151,7 +140,6 @@ func TestGetConnectionInfo_CLIOverrides(t *testing.T) {
 		Port:     1234,
 	}
 
-	// Test GetConnectionInfo - CLI should override file settings
 	result, err := GetConnectionInfo(false)
 	require.NoError(t, err)
 	assert.Equal(t, "cliuser", result.User)
@@ -164,7 +152,6 @@ func TestGetConnectionInfo_DefaultHost(t *testing.T) {
 	tmpDir := t.TempDir()
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
-	// Config without Host field
 	config := ConnectionInfo{
 		User:     "testuser",
 		Password: "testpass",
@@ -176,7 +163,6 @@ func TestGetConnectionInfo_DefaultHost(t *testing.T) {
 	err = os.WriteFile(configFile, data, 0600)
 	require.NoError(t, err)
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	originalConnectionSettings := connectionSettings
@@ -188,9 +174,8 @@ func TestGetConnectionInfo_DefaultHost(t *testing.T) {
 
 	configPath = configFile
 	DefaultConfigPath = configFile
-	connectionSettings = ConnectionInfo{} // No overrides
+	connectionSettings = ConnectionInfo{}
 
-	// Test GetConnectionInfo - should default to 127.0.0.1
 	result, err := GetConnectionInfo(false)
 	require.NoError(t, err)
 	assert.Equal(t, "127.0.0.1", result.Host)
@@ -200,7 +185,6 @@ func TestGetConnectionInfo_MissingRequiredFields(t *testing.T) {
 	tmpDir := t.TempDir()
 	configFile := filepath.Join(tmpDir, "rd-engine.json")
 
-	// Config missing required fields
 	config := ConnectionInfo{
 		Host: "testhost",
 	}
@@ -210,7 +194,6 @@ func TestGetConnectionInfo_MissingRequiredFields(t *testing.T) {
 	err = os.WriteFile(configFile, data, 0600)
 	require.NoError(t, err)
 
-	// Set the config path
 	originalConfigPath := configPath
 	originalDefaultConfigPath := DefaultConfigPath
 	originalConnectionSettings := connectionSettings
@@ -222,9 +205,8 @@ func TestGetConnectionInfo_MissingRequiredFields(t *testing.T) {
 
 	configPath = configFile
 	DefaultConfigPath = configFile
-	connectionSettings = ConnectionInfo{} // No overrides
+	connectionSettings = ConnectionInfo{}
 
-	// Test GetConnectionInfo
 	result, err := GetConnectionInfo(false)
 	assert.Nil(t, result)
 	assert.Error(t, err)
@@ -232,13 +214,11 @@ func TestGetConnectionInfo_MissingRequiredFields(t *testing.T) {
 }
 
 func TestPersistentPreRunE_Verbose(t *testing.T) {
-	// Save original log level
 	originalLevel := logrus.GetLevel()
 	t.Cleanup(func() {
 		logrus.SetLevel(originalLevel)
 	})
 
-	// Test with verbose = true
 	originalVerbose := verbose
 	t.Cleanup(func() {
 		verbose = originalVerbose
@@ -251,16 +231,13 @@ func TestPersistentPreRunE_Verbose(t *testing.T) {
 }
 
 func TestPersistentPreRunE_NotVerbose(t *testing.T) {
-	// Save original log level
 	originalLevel := logrus.GetLevel()
 	t.Cleanup(func() {
 		logrus.SetLevel(originalLevel)
 	})
 
-	// Set a non-trace level first
 	logrus.SetLevel(logrus.InfoLevel)
 
-	// Test with verbose = false
 	originalVerbose := verbose
 	t.Cleanup(func() {
 		verbose = originalVerbose
@@ -269,6 +246,5 @@ func TestPersistentPreRunE_NotVerbose(t *testing.T) {
 	verbose = false
 	err := PersistentPreRunE(nil, nil)
 	assert.NoError(t, err)
-	// Should not change to TraceLevel when verbose is false
 	assert.Equal(t, logrus.InfoLevel, logrus.GetLevel())
 }
