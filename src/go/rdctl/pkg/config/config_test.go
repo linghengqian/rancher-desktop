@@ -40,38 +40,42 @@ func saveWSLEnvs(t *testing.T) {
 }
 
 func TestIsWSLDistro(t *testing.T) {
-	for _, symlinkMode := range []os.FileMode{os.ModeSymlink, 0} {
-		symlinkText := map[os.FileMode]string{
-			os.ModeSymlink: "with wslpath symlink",
-			0:              "without wslpath symlink",
-		}[symlinkMode]
-		for _, hasEnvs := range []bool{true, false} {
-			envText := map[bool]string{
-				true:  "with WSL envs",
-				false: "without WSL envs",
-			}[hasEnvs]
-			expected := symlinkMode != 0 && hasEnvs
-			testName := fmt.Sprintf("returns %t %s %s", expected, symlinkText, envText)
-			t.Run(testName, func(t *testing.T) {
-				saveWSLEnvs(t)
-				for _, envName := range wslDistroEnvs {
-					os.Unsetenv(envName)
-				}
-				originalLstat := lstatFunc
-				t.Cleanup(func() { lstatFunc = originalLstat })
-				lstatFunc = func(_ string) (os.FileInfo, error) {
-					return fakeFileInfo{mode: symlinkMode}, nil
-				}
-				if hasEnvs {
-					os.Setenv(wslDistroEnvs[0], "Ubuntu")
-				}
-				if expected {
-					assert.True(t, isWSLDistro(), "expected isWSLDistro to be true")
-				} else {
-					assert.False(t, isWSLDistro(), "expected isWSLDistro to be false")
-				}
-			})
-		}
+	testCases := []struct {
+		name     string
+		mode     os.FileMode
+		hasEnvs  bool
+		expected bool
+	}{
+		{"with wslpath symlink and WSL envs", os.ModeSymlink, true, true},
+		{"with wslpath symlink without WSL envs", os.ModeSymlink, false, false},
+		{"with wslpath executable and WSL envs", 0755, true, true},
+		{"with wslpath executable without WSL envs", 0755, false, false},
+		{"with non-executable wslpath and WSL envs", 0644, true, false},
+		{"with non-executable wslpath without WSL envs", 0644, false, false},
+		{"without wslpath and WSL envs", 0, true, false},
+		{"without wslpath and without WSL envs", 0, false, false},
+	}
+	
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("returns %t %s", tc.expected, tc.name), func(t *testing.T) {
+			saveWSLEnvs(t)
+			for _, envName := range wslDistroEnvs {
+				os.Unsetenv(envName)
+			}
+			originalLstat := lstatFunc
+			t.Cleanup(func() { lstatFunc = originalLstat })
+			lstatFunc = func(_ string) (os.FileInfo, error) {
+				return fakeFileInfo{mode: tc.mode}, nil
+			}
+			if tc.hasEnvs {
+				os.Setenv(wslDistroEnvs[0], "Ubuntu")
+			}
+			if tc.expected {
+				assert.True(t, isWSLDistro(), "expected isWSLDistro to be true")
+			} else {
+				assert.False(t, isWSLDistro(), "expected isWSLDistro to be false")
+			}
+		})
 	}
 }
 

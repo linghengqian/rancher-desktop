@@ -138,13 +138,17 @@ func GetConnectionInfo(mayBeMissing bool) (*ConnectionInfo, error) {
 }
 
 // determines if we are running in a wsl linux distro
-// by checking for availability of wslpath and see if it's a symlink
+// by checking for availability of wslpath (as a symlink or executable) and WSL environment variables
 func isWSLDistro() bool {
 	fi, err := lstatFunc("/bin/wslpath")
 	if err != nil {
 		return false
 	}
-	if fi.Mode()&os.ModeSymlink != os.ModeSymlink {
+	// On older WSL versions, wslpath is a symlink; on newer versions (e.g., Ubuntu 24.04),
+	// it may be a regular executable. Accept both cases.
+	isSymlinkOrExecutable := (fi.Mode()&os.ModeSymlink == os.ModeSymlink) || 
+		(fi.Mode().IsRegular() && fi.Mode().Perm()&0111 != 0)
+	if !isSymlinkOrExecutable {
 		return false
 	}
 	return hasWSLEnvs()
