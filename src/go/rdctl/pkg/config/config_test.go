@@ -55,7 +55,7 @@ func TestIsWSLDistro(t *testing.T) {
 		{"without wslpath and WSL envs", 0, true, false},
 		{"without wslpath and without WSL envs", 0, false, false},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("returns %t %s", tc.expected, tc.name), func(t *testing.T) {
 			saveWSLEnvs(t)
