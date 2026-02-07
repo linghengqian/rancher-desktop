@@ -48,10 +48,10 @@ func TestIsWSLDistro(t *testing.T) {
 	}{
 		{"with wslpath symlink and WSL envs", os.ModeSymlink, true, true},
 		{"with wslpath symlink without WSL envs", os.ModeSymlink, false, false},
-		{"with wslpath executable and WSL envs", 0755, true, true},
-		{"with wslpath executable without WSL envs", 0755, false, false},
-		{"with non-executable wslpath and WSL envs", 0644, true, false},
-		{"with non-executable wslpath without WSL envs", 0644, false, false},
+		{"with wslpath executable and WSL envs", 0o755, true, true},
+		{"with wslpath executable without WSL envs", 0o755, false, false},
+		{"with non-executable wslpath and WSL envs", 0o644, true, false},
+		{"with non-executable wslpath without WSL envs", 0o644, false, false},
 		{"without wslpath and WSL envs", 0, true, false},
 		{"without wslpath and without WSL envs", 0, false, false},
 	}

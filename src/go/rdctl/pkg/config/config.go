@@ -147,7 +147,7 @@ func isWSLDistro() bool {
 	// On older WSL versions, wslpath is a symlink; on newer versions (e.g., Ubuntu 24.04),
 	// it may be a regular executable. Accept both cases.
 	isSymlinkOrExecutable := (fi.Mode()&os.ModeSymlink == os.ModeSymlink) ||
-		(fi.Mode().IsRegular() && fi.Mode().Perm()&0111 != 0)
+		(fi.Mode().IsRegular() && fi.Mode().Perm()&0o111 != 0)
 	if !isSymlinkOrExecutable {
 		return false
 	}
