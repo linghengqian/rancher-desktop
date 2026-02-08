@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -248,3 +249,97 @@ func TestPersistentPreRunE_NotVerbose(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, logrus.InfoLevel, logrus.GetLevel())
 }
+
+func TestIsWSLDistro_NotWSL(t *testing.T) {
+	originalLstatFunc := lstatFunc
+	t.Cleanup(func() {
+		lstatFunc = originalLstatFunc
+	})
+
+	lstatFunc = func(name string) (os.FileInfo, error) {
+		return nil, os.ErrNotExist
+	}
+
+	assert.False(t, isWSLDistro())
+}
+
+func TestIsWSLDistro_NoWSLEnvs(t *testing.T) {
+	originalLstatFunc := lstatFunc
+	t.Cleanup(func() {
+		lstatFunc = originalLstatFunc
+	})
+
+	lstatFunc = func(name string) (os.FileInfo, error) {
+		return &mockFileInfo{mode: os.ModeSymlink | 0o755}, nil
+	}
+
+	// Clear WSL env vars if they exist
+	for _, envName := range wslDistroEnvs {
+		if val, ok := os.LookupEnv(envName); ok {
+			t.Setenv(envName, "")
+			os.Unsetenv(envName)
+			t.Cleanup(func() {
+				os.Setenv(envName, val)
+			})
+		}
+	}
+
+	assert.False(t, isWSLDistro())
+}
+
+func TestIsWSLDistro_WithSymlink(t *testing.T) {
+	originalLstatFunc := lstatFunc
+	t.Cleanup(func() {
+		lstatFunc = originalLstatFunc
+	})
+
+	lstatFunc = func(name string) (os.FileInfo, error) {
+		return &mockFileInfo{mode: os.ModeSymlink | 0o755}, nil
+	}
+
+	t.Setenv("WSL_DISTRO_NAME", "Ubuntu")
+	assert.True(t, isWSLDistro())
+}
+
+func TestIsWSLDistro_WithExecutable(t *testing.T) {
+	originalLstatFunc := lstatFunc
+	t.Cleanup(func() {
+		lstatFunc = originalLstatFunc
+	})
+
+	lstatFunc = func(name string) (os.FileInfo, error) {
+		return &mockFileInfo{mode: 0o755}, nil
+	}
+
+	t.Setenv("WSL_INTEROP", "/run/WSL/123_interop")
+	assert.True(t, isWSLDistro())
+}
+
+func TestHasWSLEnvs(t *testing.T) {
+	// Clear all WSL env vars first
+	for _, envName := range wslDistroEnvs {
+		if val, ok := os.LookupEnv(envName); ok {
+			os.Unsetenv(envName)
+			t.Cleanup(func() {
+				os.Setenv(envName, val)
+			})
+		}
+	}
+
+	assert.False(t, hasWSLEnvs())
+
+	t.Setenv("WSL_DISTRO_NAME", "Ubuntu")
+	assert.True(t, hasWSLEnvs())
+}
+
+// mockFileInfo implements os.FileInfo for testing
+type mockFileInfo struct {
+	mode os.FileMode
+}
+
+func (m *mockFileInfo) Name() string       { return "wslpath" }
+func (m *mockFileInfo) Size() int64        { return 0 }
+func (m *mockFileInfo) Mode() os.FileMode  { return m.mode }
+func (m *mockFileInfo) ModTime() time.Time { return time.Now() }
+func (m *mockFileInfo) IsDir() bool        { return false }
+func (m *mockFileInfo) Sys() interface{}   { return nil }

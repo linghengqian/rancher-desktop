@@ -18,12 +18,17 @@ limitations under the License.
 package config
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -46,15 +51,45 @@ var (
 	configPath string
 	// DefaultConfigPath - used to differentiate not being able to find a user-specified config file from the default
 	DefaultConfigPath string
+
+	wslDistroEnvs = []string{"WSL_DISTRO_NAME", "WSL_INTEROP", "WSLENV"}
+	// lstatFunc allows tests to inject a stub for /bin/wslpath checks.
+	lstatFunc = os.Lstat
 )
 
 // DefineGlobalFlags sets up the global flags, available for all sub-commands
 func DefineGlobalFlags(rootCmd *cobra.Command) {
-	appPaths, err := paths.GetPaths()
-	if err != nil {
-		log.Fatalf("failed to get paths: %s", err)
+	var configDir string
+
+	// In WSL, try to use Windows config path first, fallback to Linux path if it doesn't exist
+	if runtime.GOOS == "linux" && isWSLDistro() {
+		ctx := rootCmd.Context()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		
+		// Try to get Windows config directory
+		windowsConfigDir, wslErr := wslifyConfigDir(ctx)
+		if wslErr == nil {
+			// Check if Windows config file exists
+			windowsConfigPath := filepath.Join(windowsConfigDir, "rancher-desktop", "rd-engine.json")
+			if _, statErr := os.Stat(windowsConfigPath); statErr == nil {
+				// Windows config exists, use it
+				configDir = filepath.Join(windowsConfigDir, "rancher-desktop")
+			}
+		}
 	}
-	DefaultConfigPath = filepath.Join(appPaths.AppHome, "rd-engine.json")
+
+	// If we didn't find a Windows config in WSL, or we're not in WSL, use standard Linux paths
+	if configDir == "" {
+		appPaths, err := paths.GetPaths()
+		if err != nil {
+			log.Fatalf("failed to get paths: %s", err)
+		}
+		configDir = appPaths.AppHome
+	}
+
+	DefaultConfigPath = filepath.Join(configDir, "rd-engine.json")
 	rootCmd.PersistentFlags().StringVar(&configPath, "config-path", "", fmt.Sprintf("config file (default %s)", DefaultConfigPath))
 	rootCmd.PersistentFlags().StringVar(&connectionSettings.User, "user", "", "overrides the user setting in the config file")
 	rootCmd.PersistentFlags().StringVar(&connectionSettings.Host, "host", "", "default is 127.0.0.1; most useful for WSL")
@@ -120,4 +155,64 @@ func PersistentPreRunE(cmd *cobra.Command, args []string) error {
 		logrus.SetLevel(logrus.TraceLevel)
 	}
 	return nil
+}
+
+// isWSLDistro determines if we are running in a WSL Linux distro
+// by checking for availability of wslpath and WSL environment variables
+func isWSLDistro() bool {
+	fi, err := lstatFunc("/bin/wslpath")
+	if err != nil {
+		return false
+	}
+	// Check if it's a symlink or regular executable
+	mode := fi.Mode()
+	if mode&os.ModeSymlink != os.ModeSymlink && !mode.IsRegular() {
+		return false
+	}
+	// Also verify it's executable
+	if mode.IsRegular() && mode.Perm()&0o111 == 0 {
+		return false
+	}
+	return hasWSLEnvs()
+}
+
+// hasWSLEnvs reports whether any WSL environment marker is present.
+func hasWSLEnvs() bool {
+	for _, envName := range wslDistroEnvs {
+		if _, ok := os.LookupEnv(envName); ok {
+			return true
+		}
+	}
+	return false
+}
+
+// getLocalAppDataPath retrieves the Windows LOCALAPPDATA path from within WSL
+func getLocalAppDataPath(ctx context.Context) (string, error) {
+	var outBuf bytes.Buffer
+	// changes the codepage to 65001 which is UTF-8
+	subCommand := `chcp 65001 >nul & echo %LOCALAPPDATA%`
+	cmd := exec.CommandContext(ctx, "cmd.exe", "/c", subCommand)
+	cmd.Stdout = &outBuf
+	// We are intentionally not using CombinedOutput and
+	// excluding the stderr since it could contain some
+	// warnings when rdctl is triggered from a non WSL mounted directory
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+	return strings.TrimRight(outBuf.String(), "\r\n"), nil
+}
+
+// wslifyConfigDir converts a Windows path to a WSL path
+func wslifyConfigDir(ctx context.Context) (string, error) {
+	path, err := getLocalAppDataPath(ctx)
+	if err != nil {
+		return "", err
+	}
+	var outBuf bytes.Buffer
+	cmd := exec.CommandContext(ctx, "/bin/wslpath", path)
+	cmd.Stdout = &outBuf
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+	return strings.TrimRight(outBuf.String(), "\r\n"), nil
 }
