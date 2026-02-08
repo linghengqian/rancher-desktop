@@ -60,27 +60,23 @@ var (
 // DefineGlobalFlags sets up the global flags, available for all sub-commands
 func DefineGlobalFlags(rootCmd *cobra.Command) {
 	var configDir string
-
-	// In WSL, try to use Windows config path first, fallback to Linux path if it doesn't exist
+	var err error
 	if runtime.GOOS == "linux" && isWSLDistro() {
 		ctx := rootCmd.Context()
 		if ctx == nil {
 			ctx = context.Background()
 		}
-		
-		// Try to get Windows config directory
-		windowsConfigDir, wslErr := wslifyConfigDir(ctx)
-		if wslErr == nil {
-			// Check if Windows config file exists
-			windowsConfigPath := filepath.Join(windowsConfigDir, "rancher-desktop", "rd-engine.json")
-			if _, statErr := os.Stat(windowsConfigPath); statErr == nil {
-				// Windows config exists, use it
-				configDir = filepath.Join(windowsConfigDir, "rancher-desktop")
+		if configDir, err = wslifyConfigDir(ctx); err == nil {
+			windowsConfigPath := filepath.Join(configDir, "rancher-desktop", "rd-engine.json")
+			if _, statErr := os.Stat(windowsConfigPath); statErr != nil {
+				configDir = ""
+			} else {
+				configDir = filepath.Join(configDir, "rancher-desktop")
 			}
+		} else {
+			configDir = ""
 		}
 	}
-
-	// If we didn't find a Windows config in WSL, or we're not in WSL, use standard Linux paths
 	if configDir == "" {
 		appPaths, err := paths.GetPaths()
 		if err != nil {
@@ -88,7 +84,6 @@ func DefineGlobalFlags(rootCmd *cobra.Command) {
 		}
 		configDir = appPaths.AppHome
 	}
-
 	DefaultConfigPath = filepath.Join(configDir, "rd-engine.json")
 	rootCmd.PersistentFlags().StringVar(&configPath, "config-path", "", fmt.Sprintf("config file (default %s)", DefaultConfigPath))
 	rootCmd.PersistentFlags().StringVar(&connectionSettings.User, "user", "", "overrides the user setting in the config file")
@@ -149,28 +144,14 @@ func GetConnectionInfo(mayBeMissing bool) (*ConnectionInfo, error) {
 	return &settings, nil
 }
 
-// PersistentPreRunE is meant to be executed as the cobra hook
-func PersistentPreRunE(cmd *cobra.Command, args []string) error {
-	if verbose {
-		logrus.SetLevel(logrus.TraceLevel)
-	}
-	return nil
-}
-
-// isWSLDistro determines if we are running in a WSL Linux distro
-// by checking for availability of wslpath and WSL environment variables
+// determines if we are running in a wsl linux distro
+// by checking for availability of wslpath and see if it's a symlink
 func isWSLDistro() bool {
 	fi, err := lstatFunc("/bin/wslpath")
 	if err != nil {
 		return false
 	}
-	// Check if it's a symlink or regular executable
-	mode := fi.Mode()
-	if mode&os.ModeSymlink != os.ModeSymlink && !mode.IsRegular() {
-		return false
-	}
-	// Also verify it's executable
-	if mode.IsRegular() && mode.Perm()&0o111 == 0 {
+	if fi.Mode()&os.ModeSymlink != os.ModeSymlink {
 		return false
 	}
 	return hasWSLEnvs()
@@ -186,7 +167,6 @@ func hasWSLEnvs() bool {
 	return false
 }
 
-// getLocalAppDataPath retrieves the Windows LOCALAPPDATA path from within WSL
 func getLocalAppDataPath(ctx context.Context) (string, error) {
 	var outBuf bytes.Buffer
 	// changes the codepage to 65001 which is UTF-8
@@ -202,7 +182,6 @@ func getLocalAppDataPath(ctx context.Context) (string, error) {
 	return strings.TrimRight(outBuf.String(), "\r\n"), nil
 }
 
-// wslifyConfigDir converts a Windows path to a WSL path
 func wslifyConfigDir(ctx context.Context) (string, error) {
 	path, err := getLocalAppDataPath(ctx)
 	if err != nil {
@@ -214,5 +193,13 @@ func wslifyConfigDir(ctx context.Context) (string, error) {
 	if err := cmd.Run(); err != nil {
 		return "", err
 	}
-	return strings.TrimRight(outBuf.String(), "\r\n"), nil
+	return strings.TrimRight(outBuf.String(), "\r\n"), err
+}
+
+// PersistentPreRunE is meant to be executed as the cobra hook
+func PersistentPreRunE(cmd *cobra.Command, args []string) error {
+	if verbose {
+		logrus.SetLevel(logrus.TraceLevel)
+	}
+	return nil
 }
