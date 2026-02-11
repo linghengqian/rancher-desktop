@@ -113,9 +113,6 @@ jobs:
 
     - name: Build Snap package
       run: |
-        # Extract version from release tag
-        version="${RELEASE_TAG#v}"
-        
         # Create working directory for snap build
         mkdir -p snap-build
         cd snap-build
@@ -123,9 +120,8 @@ jobs:
         # Copy the linux zip as the source
         cp ../rancher-desktop-linux-*.zip rancher-desktop.zip
         
-        # Copy snapcraft.yaml and update version
+        # Copy snapcraft.yaml (version is extracted from appdata.xml via adopt-info)
         cp $GITHUB_WORKSPACE/packaging/linux/snapcraft.yaml .
-        sed -i "s/^version: .*/version: '${version}'/" snapcraft.yaml
         
         # Install snapcraft
         sudo snap install snapcraft --classic

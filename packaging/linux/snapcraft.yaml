@@ -11,7 +11,7 @@ description: |
   - Access kubectl and other Kubernetes CLI tools
   - Manage container workloads with nerdctl or docker CLI
 license: Apache-2.0
-version: '0.0.0'  # This will be replaced during build
+adopt-info: rancher-desktop
 grade: stable
 confinement: strict
 base: core24
@@ -55,6 +55,12 @@ parts:
       '*': opt/rancher-desktop/
     override-build: |
       craftctl default
+      
+      # Extract version from appdata.xml and set it
+      VERSION=$(grep -oP '<release version="\K[^"]+' \
+        "${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/linux/rancher-desktop.appdata.xml" \
+        | head -1)
+      craftctl set-version "$VERSION"
       
       # Generate icons
       icon="${CRAFT_PART_INSTALL}/opt/rancher-desktop/resources/resources/icons/logo-square-512.png"
