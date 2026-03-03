@@ -70,6 +70,16 @@ apps:
     plugs:
       - home
       - network
+  helm:
+    command: opt/rancher-desktop/resources/resources/linux/bin/helm
+    plugs:
+      - home
+      - network
+  spin:
+    command: opt/rancher-desktop/resources/resources/linux/bin/spin
+    plugs:
+      - home
+      - network
 
 parts:
   rancher-desktop:
