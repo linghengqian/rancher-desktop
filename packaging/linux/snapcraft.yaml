@@ -122,13 +122,7 @@ apps:
       - home
     aliases:
       - docker-credential-pass
-  docker-credential-secretservice:
-    command: opt/rancher-desktop/resources/resources/linux/bin/docker-credential-secretservice
-    plugs:
-      - home
-      - password-manager-service
-    aliases:
-      - docker-credential-secretservice
+
 
 parts:
   rancher-desktop:

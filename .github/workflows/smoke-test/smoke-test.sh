@@ -156,7 +156,6 @@ install_linux() {
             sudo snap alias rancher-desktop.docker-credential-ecr-login docker-credential-ecr-login
             sudo snap alias rancher-desktop.docker-credential-none docker-credential-none
             sudo snap alias rancher-desktop.docker-credential-pass docker-credential-pass
-            sudo snap alias rancher-desktop.docker-credential-secretservice docker-credential-secretservice
             cleanups+=("sudo snap remove rancher-desktop --purge")
             RDCTL="/snap/rancher-desktop/current/opt/rancher-desktop/resources/resources/linux/bin/rdctl"
             return
