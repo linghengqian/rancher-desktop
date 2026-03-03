@@ -146,6 +146,10 @@ install_linux() {
             return
         elif [[ "$archiveName" =~ .*\.snap$ ]]; then
             sudo snap install --dangerous "$archiveName"
+            sudo snap connect rancher-desktop:kvm
+            sudo snap connect rancher-desktop:mount-observe
+            sudo snap connect rancher-desktop:process-control
+            sudo snap connect rancher-desktop:system-observe
             sudo snap alias rancher-desktop.docker docker
             sudo snap alias rancher-desktop.nerdctl nerdctl
             sudo snap alias rancher-desktop.kubectl kubectl
