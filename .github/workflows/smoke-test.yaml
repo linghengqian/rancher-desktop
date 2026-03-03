@@ -114,11 +114,8 @@ jobs:
     - name: Build Snap package
       run: |
         sudo snap install snapcraft --classic
-        sudo snap set snapcraft provider=lxd
-        sudo snap install lxd --channel=6/edge
-        sudo usermod -a -G lxd $USER
-        newgrp lxd
-        sudo lxd init --auto
+        sudo snap install multipass
+        sudo snap set snapcraft provider=multipass
         
         cp rancher-desktop-linux-*.zip packaging/linux/rancher-desktop-linux.zip
         

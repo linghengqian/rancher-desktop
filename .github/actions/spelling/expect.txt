@@ -336,7 +336,6 @@ linkname
 linode
 linuxkit
 Linuxy
-lxd
 loadbalancer
 loblaw
 localnet
@@ -390,7 +389,6 @@ netsh
 networkpolicy
 neu
 newauth
-newgrp
 newfs
 newpid
 nginx

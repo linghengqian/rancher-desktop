@@ -55,31 +55,43 @@ apps:
     plugs:
       - home
       - network
+    aliases:
+      - rdctl
   docker:
     command: opt/rancher-desktop/resources/resources/linux/bin/docker
     plugs:
       - home
       - network
+    aliases:
+      - docker
   nerdctl:
     command: opt/rancher-desktop/resources/resources/linux/bin/nerdctl
     plugs:
       - home
       - network
+    aliases:
+      - nerdctl
   kubectl:
     command: opt/rancher-desktop/resources/resources/linux/bin/kubectl
     plugs:
       - home
       - network
+    aliases:
+      - kubectl
   helm:
     command: opt/rancher-desktop/resources/resources/linux/bin/helm
     plugs:
       - home
       - network
+    aliases:
+      - helm
   spin:
     command: opt/rancher-desktop/resources/resources/linux/bin/spin
     plugs:
       - home
       - network
+    aliases:
+      - spin
 
 parts:
   rancher-desktop:
