@@ -169,6 +169,7 @@ eagerzeroedthick
 eastus
 ebegin
 ecm
+egl
 edmonton
 einfo
 electronjs
@@ -326,7 +327,6 @@ kurrent
 kwctl
 ldconfig
 LGHT
-libegl
 limactl
 limaiptables
 limaloc
