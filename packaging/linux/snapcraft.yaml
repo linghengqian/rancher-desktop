@@ -61,6 +61,8 @@ apps:
       - rdctl
   docker:
     command: opt/rancher-desktop/resources/resources/linux/bin/docker
+    environment:
+      PATH: /snap/bin:$SNAP/opt/rancher-desktop/resources/resources/linux/bin:$PATH
     plugs:
       - home
       - network
