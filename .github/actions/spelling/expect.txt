@@ -169,7 +169,6 @@ eagerzeroedthick
 eastus
 ebegin
 ecm
-egl
 edmonton
 einfo
 electronjs
