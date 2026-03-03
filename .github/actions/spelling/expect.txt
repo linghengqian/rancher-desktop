@@ -390,6 +390,7 @@ netsh
 networkpolicy
 neu
 newauth
+newgrp
 newfs
 newpid
 nginx
