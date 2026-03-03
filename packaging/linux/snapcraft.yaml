@@ -122,3 +122,5 @@ parts:
       - libgl1-mesa-dri
       - libgl1
       - libegl1
+      - libnspr4
+      - libnss3
