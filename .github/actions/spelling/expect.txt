@@ -336,6 +336,7 @@ linkname
 linode
 linuxkit
 Linuxy
+lxd
 loadbalancer
 loblaw
 localnet
