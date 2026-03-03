@@ -131,7 +131,5 @@ parts:
     build-packages:
       - imagemagick
     stage-packages:
-      - glib-networking
-      - libproxy1v5
       - libnspr4
       - libnss3
