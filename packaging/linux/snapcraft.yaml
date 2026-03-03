@@ -94,6 +94,38 @@ apps:
       - network
     aliases:
       - spin
+  kuberlr:
+    command: opt/rancher-desktop/resources/resources/linux/bin/kuberlr
+    plugs:
+      - home
+      - network
+    aliases:
+      - kuberlr
+  docker-credential-ecr-login:
+    command: opt/rancher-desktop/resources/resources/linux/bin/docker-credential-ecr-login
+    plugs:
+      - home
+      - network
+    aliases:
+      - docker-credential-ecr-login
+  docker-credential-none:
+    command: opt/rancher-desktop/resources/resources/linux/bin/docker-credential-none
+    plugs:
+      - home
+    aliases:
+      - docker-credential-none
+  docker-credential-pass:
+    command: opt/rancher-desktop/resources/resources/linux/bin/docker-credential-pass
+    plugs:
+      - home
+    aliases:
+      - docker-credential-pass
+  docker-credential-secretservice:
+    command: opt/rancher-desktop/resources/resources/linux/bin/docker-credential-secretservice
+    plugs:
+      - home
+    aliases:
+      - docker-credential-secretservice
 
 parts:
   rancher-desktop:
