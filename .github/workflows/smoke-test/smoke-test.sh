@@ -146,6 +146,12 @@ install_linux() {
             return
         elif [[ "$archiveName" =~ .*\.snap$ ]]; then
             sudo snap install --dangerous "$archiveName"
+            sudo snap alias rancher-desktop.docker docker
+            sudo snap alias rancher-desktop.nerdctl nerdctl
+            sudo snap alias rancher-desktop.kubectl kubectl
+            sudo snap alias rancher-desktop.helm helm
+            sudo snap alias rancher-desktop.spin spin
+            sudo snap alias rancher-desktop.rdctl rdctl
             cleanups+=("sudo snap remove rancher-desktop --purge")
             RDCTL="/snap/rancher-desktop/current/opt/rancher-desktop/resources/resources/linux/bin/rdctl"
             return
