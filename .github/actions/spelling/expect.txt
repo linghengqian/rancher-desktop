@@ -410,6 +410,7 @@ nothrow
 notifempty
 notset
 npipe
+nspr
 nsenter
 nsis
 NSISUNINSTALLCOMMAND
